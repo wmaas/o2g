@@ -1,0 +1,86 @@
+/*
+ * Css styles for jQuery pugin Auto Ajax Loader Indicator
+ * Autor: Yuriy Antokhin
+ * Mail: yuriyant@gmail.com
+*/
+
+/*
+* Default template
+*/
+#atpl .overlay {
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #9da0a4;
+    opacity: 0.2;
+    /* height:100%; width:100%; */
+    /*   uncomment to display overlay     */
+}
+
+#atpl span {
+    display: block;
+    position: fixed;
+    right: 4px;
+    top: 4px;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: default;
+    font-size: 14px;
+    z-index: 20001;
+    background: #c71d72
+}
+
+#atpl span.imgLoader {
+    padding: 5px 11px 5px 30px;
+    background: url(/odcs/images/ajax-loader.gif) 10% 50% no-repeat #c71d72
+}
+
+/*
+* Gmail style template
+*/
+/*
+#atpl{background-color:#f9edbe;border-color:#f0c36d;left:-50px;margin-left:50%;padding-bottom:4px;position:fixed;top:0;z-index:20001}
+#atpl span{border:1px solid transparent;border-radius:2px;box-shadow:0 2px 4px rgba(0,0,0,0.2);padding:4px 10px;text-align:center;white-space:nowrap}
+#atpl span.imgLoader{background:url(../img/ajax-loader-y-16.gif) 10% 50% no-repeat #f9edbe;padding:5px 11px 5px 30px}
+*/
+
+/*
+* MASK 
+* If you are using a mask then add these styles
+*/
+
+.aimask {
+    z-index: 100;
+    position: absolute;
+    top: 0;
+    left: 0;
+    -moz-opacity: .5;
+    opacity: .50;
+    filter: alpha(opacity=50);
+    background-color: #CCC;
+    width: 100%;
+    height: 100%;
+    zoom: 1
+}
+
+.aimask-msg {
+    display: none;
+    font-size: 14px;
+    z-index: 10001;
+    position: absolute;
+    background: #c71d72;
+    color: #fff;
+    padding: 5px 5px;
+    border-radius: 5px;
+    cursor: default
+}
+
+.aimasked {
+    overflow: hidden !important
+}
+
+.aimasked-relative {
+    position: relative !important
+}
