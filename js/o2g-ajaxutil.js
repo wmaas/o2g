@@ -1,7 +1,7 @@
 /**
  * @desc Das Modul O2G.AjaxUtil stellt die Funktionen und Kontexte
  * für die Kommunikation (HTTP) zum CICS bereit.
- *
+ * GIT
  */
 O2G.AjaxUtil = (function () {
     'use strict';
@@ -168,7 +168,7 @@ O2G.AjaxUtil = (function () {
                 window.location.hash = '';
                 setTimeout(window.close(), 2000);
                 setTimeout(function () {
-                    window.close()
+                    window.close();
                 }, 2000);
             } else {
                 _upsAJAX(jqXHR, exception, settings, event);

@@ -1,4 +1,4 @@
-/**
+  /**
  * @desc Das ist das Einstiegsscript in O2G. Im Normalfall wird die Funktion
  * O2G.BasicAuthRacf.signon (RACF Anmeldung) aufgerufen.
  * PING und QUNIT Testläufe werden durch spezielle URL HASH #/ping/... oder #/qunit/...
