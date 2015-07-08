@@ -95,8 +95,7 @@ O2G.Config = (function () {
             'äABCDEFGHI ô¦òóõ' + //208
             'üJKLMNOPQR¹û}ùúÿ' + //224
             'Ö÷STUVWXYZ²Ô\\ÒÓÕ' + //240
-            '0123456789³Û]ÙÚ ' //256
-            ,
+            '0123456789³Û]ÙÚ ', //256
 
         XSS: true,
         COLUMNFACTOR: 0.61,
