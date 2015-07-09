@@ -211,6 +211,7 @@ O2G.GUIStatic = (function () {
                 if (!_isIgnoredKey(event.which)) {
                     var input = $(event.target),
                         _max = parseInt(input.attr('maxlength'), 10) - 1;
+                    O2G.GUIStatic.$LastFieldUsed = input;
                     if ((input.val().length == _max && event.target.selectionStart == _max && event.target.selectionEnd == _max) || (_max == 0 && input.val().length === 1)) {
                         var id = input.parent().attr('id'),
                             lastField = O2G.GUI.screenlist[O2G.GUI.screenid].lastFieldId;
@@ -334,6 +335,7 @@ O2G.GUIStatic = (function () {
                 if (_icon === undefined) {
                     _icon = $('span', _target).attr('class');
                 }
+                _FKey = '';
                 switch (_icon) {
                 case "icon-help":
                     _FKey = 'F1';
@@ -345,23 +347,36 @@ O2G.GUIStatic = (function () {
                     _FKey = 'F3';
                     break;
                 case "icon-pageup":
+                    if (!O2G.GUI.validFields()) {
+                        return true;
+                    }
                     _FKey = 'F7';
                     break;
                 case "icon-pagedown":
+                    if (!O2G.GUI.validFields()) {
+                        return true;
+                    }
                     _FKey = 'F8';
                     break;
                 case "icon-commit":
+                    if (!O2G.GUI.validFields()) {
+                        return true;
+                    }
                     _FKey = 'F10';
                     break;
                 case "icon-menus":
                     _FKey = 'F11';
                     break;
                 case "icon-enter":
+                    if (!O2G.GUI.validFields()) {
+                        return true;
+                    }
                     _FKey = 'ENTR';
                     break;
                 default:
                     _FKey = '';
                 }
+
                 if (_FKey) {
                     O2G.GUI.processEnter(_FKey);
                 }
@@ -566,12 +581,24 @@ O2G.GUIStatic = (function () {
             } else if (e.which === 116 || e.which === 117 || e.which === 120) {
                 O2G.AjaxUtil.lastactionkey = _FKey;
                 _FKey = '';
+                if (O2G.GUIStatic.$LastFieldUsed){
+                    O2G.GUIStatic.$LastFieldUsed.blur();
+                }
+                if (!O2G.GUI.validFields()) {
+                    return false;
+                }
                 return true;
             } else if (e.which === O2G.Config.PAGE_UP || e.which === 118) {
                 _FKey = 'F7';
                 if (O2G.GUI.validatePaging(_FKey)) {
                     O2G.AjaxUtil.lastactionkey = _FKey;
                     _FKey = '';
+                    if (O2G.GUIStatic.$LastFieldUsed){
+                        O2G.GUIStatic.$LastFieldUsed.blur();
+                    }
+                    if (!O2G.GUI.validFields()) {
+                        return false;
+                    }
                     return true;
                 }
             } else if (e.which === O2G.Config.PAGE_DOWN || e.which === 119) {
@@ -579,6 +606,12 @@ O2G.GUIStatic = (function () {
                 if (O2G.GUI.validatePaging(_FKey)) {
                     O2G.AjaxUtil.lastactionkey = _FKey;
                     _FKey = '';
+                    if (O2G.GUIStatic.$LastFieldUsed){
+                        O2G.GUIStatic.$LastFieldUsed.blur();
+                    }
+                    if (!O2G.GUI.validFields()) {
+                        return false;
+                    }
                     return true;
                 }
             } else if (e.which === O2G.Config.CNTRL) {
@@ -612,6 +645,13 @@ O2G.GUIStatic = (function () {
             console.debug(_FKey + ' true');
         }
         O2G.AjaxUtil.lastactionkey = _FKey;
+        if (O2G.GUIStatic.$LastFieldUsed){
+            O2G.GUIStatic.$LastFieldUsed.blur();
+        }
+        if (!O2G.GUI.validFields()) {
+             _FKey = '';
+            return false;
+        }
         return true;
     };
 
@@ -767,6 +807,7 @@ O2G.GUIStatic = (function () {
 
         // Variablen, die von anderen Modulen des O2G Paketes verwendet werden
         $Body: '',
+        $LastFieldUsed: '',
         header: '',
         footer: '',
         VERSION: '$Revision: 35 $',

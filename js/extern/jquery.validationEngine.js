@@ -1028,6 +1028,15 @@ _strukt : function (field, rules, i, options) {
 		opFrmtLtrlRegExpObj = /(\'\Nr\.\'[.%]|\'\Nr\.\'[9]*|\'[9]*\.\'[.%]|\'[9]*\.\'[9]*|[9]*)/g,
 		opFrmtLtrlRegExp = opFrmtLtrlRegExpObj.toString().substr(1, opFrmtLtrlRegExpObj.toString().lastIndexOf('/g') - 1);
 
+	jQuery(field).removeAttr('resulterrortext');
+	jQuery(field).removeAttr('resultstring');
+
+	/** if rule is not found */
+	if (!rule) {
+		jQuery(field).attr('resulterrortext', 'Rule not found - ' + customRule);
+		return;
+	}
+
 
 	/** Initializing regular expression */
 	rule.ipRegEx = (!rule.ipRegEx) ?  [] : rule.ipRegEx;
@@ -1184,12 +1193,12 @@ _strukt : function (field, rules, i, options) {
 									.replace(opFmtTknNine, ipFormatTokenValue) + opFormatTokenValue;
 				}
 
-				jQuery.data(field, 'resultString', opFormatTokenValue.replace(/\@/g, '.'));
+				jQuery(field).attr('resultstring', opFormatTokenValue.replace(/\@/g, '.'));
 				return;
 			}
 		}
 	}
-	jQuery.data(field, 'resultErrorText', rule.alertText);
+	jQuery(field).attr('resulterrortext', rule.alertText);
 	return rule.alertText;
 },
 		
@@ -1218,11 +1227,15 @@ _amount:  function(field, rules, i, options) {
 		finalResultString = '',
 		hexResult = '';
 
+	jQuery(field).removeAttr('resulterrortext');
+	jQuery(field).removeAttr('resultstringhex');
+
 	/** if rule is not found */
 	if (!rule) {
-		jQuery.data(field, 'resultErrorText', 'Rule not found - ' + customRule);
+		jQuery(field).attr('resulterrortext', 'Rule not found - ' + customRule);
 		return;
 	}
+
 
 	/**
 	* The following 'if..' is used for this kind of rule
@@ -1292,7 +1305,7 @@ _amount:  function(field, rules, i, options) {
 	value = value.replace(regExpSpDo, '').replace(regExpComma, '.');
 	/** checking the input 'value' based on the defined Regular expression */
 	if (!rule.regEx.test(value)) {
-		jQuery.data(field, 'resultErrorText', rule.alertText);
+		jQuery(field).attr('resulterrortext', rule.alertText);
 		return rule.alertText;
 	}
 	/** passed input 'value' is been splitted into two parts(integer and decimal) */
@@ -1311,7 +1324,7 @@ _amount:  function(field, rules, i, options) {
 	}
 	/** if amount is not in range (found = false) */
 	if (!found) {
-		jQuery.data(field, 'resultErrorText', rule.alertTextRange);
+		jQuery(field).attr('resulterrortext', rule.alertTextRange);
 		return rule.alertTextRange;
 	}
 
@@ -1320,7 +1333,7 @@ _amount:  function(field, rules, i, options) {
 	* this if is executed while the amount range is not defined.
 	*/
 	if (!arrValue[0]) {
-		jQuery.data(field, 'resultErrorText', rule.alertText);
+		jQuery(field).attr('resulterrortext', rule.alertText);
 		return rule.alertText;
 	}
 	/** getting only numbers if value is with '+' or '-' sign */
@@ -1346,7 +1359,7 @@ _amount:  function(field, rules, i, options) {
 	/** adding letter 'D', in case of negative value */
 	hexResult = (value < 0) ? hexResult.substring(0, (len - 1) * 2) + 'D' + hexResult.substring(((len - 1) * 2) + 1) : hexResult;
 
-	jQuery.data(field, 'resultString', hexResult);
+	jQuery(field).attr('resultstringhex', hexResult);
 },
 
 		/**
@@ -1367,9 +1380,16 @@ _date: function (field, rules, i, options) {
 		ipfLen = dateFormatInputArray.length,
 		outputFormat = rule.dateFormatOutput;
 
+	jQuery(field).removeAttr('resulterrortext');
+	jQuery(field).removeAttr('resultstring');
+
 	/** if rule is not found */
 	if (!rule) {
-		jQuery.data(field, 'resultErrorText', 'No Rule Found - ' + customRule);
+		jQuery(field).attr('resulterrortext', 'No Rule Found - ' + customRule);
+		return;
+	}
+	
+	if (!value.length){
 		return;
 	}
     
@@ -1526,8 +1546,8 @@ _date: function (field, rules, i, options) {
 
 			/** To check the date is valid or not.*/
 			if (!methods._isDate(month + '/' + day + '/' + fullYear)) {
-				jQuery.data(field, 'resultErrorText', rule.alertText + ' ' + String(rule.dateFormat).replace(/,/g, ' or '));
-				return rule.alertText + " " + String(rule.dateFormat).replace(/,/g, ' or ');
+				jQuery(field).attr('resulterrortext', rule.alertText + ' ' + String(rule.dateFormat).replace(/,/g, ', '));
+				return rule.alertText + " " + String(rule.dateFormat).replace(/,/g, ', ');
 			}
 
 			/** checking the daterange if it is defined. */
@@ -1539,16 +1559,16 @@ _date: function (field, rules, i, options) {
 				    found = rule.range[rangeIndex++](finalResultDate);
 				}
 				if (!found) {
-					jQuery.data(field, 'resultErrorText', rule.alertTextRange);
+					jQuery(field).attr('resulterrortext', rule.alertTextRange);
 					return rule.alertTextRange;
 				}
 			}
-			jQuery.data(field, 'resultString', outputFormat);
+			jQuery(field).attr('resultstring', outputFormat);
 			return;
 		}//if (pattern.test...)
 	} //for while loop
-	jQuery.data(field, 'resultErrorText', rule.alertText + ' ' + String(rule.dateFormat).replace(/,/g, ' or '));
-	return rule.alertText + ' ' + String(rule.dateFormat).replace(/,/g, ' or ');
+	jQuery(field).attr('resulterrortext', rule.alertText + ' ' + String(rule.dateFormat).replace(/,/g, ', '));
+	return rule.alertText + ' ' + String(rule.dateFormat).replace(/,/g, ', ');
 },
 
 		/**
@@ -1566,7 +1586,9 @@ _date: function (field, rules, i, options) {
 			var rule = options.allrules[customRule];
 			var fn;
 			if(!rule) {
-				alert("jqv:custom rule not found - "+customRule);
+				if (field.val() && field.val().length){
+					alert("jqv:custom rule not found - " + customRule);
+				}
 				return;
 			}
 

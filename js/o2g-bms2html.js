@@ -83,16 +83,25 @@ O2G.BMS2HTML = (function () {
      *
      */
     var _setFieldRule = function (id, attr, ruleref) {
-        var rule = " ";
-        var num = "";
+        var rule = " ",
+            num = "",
+            typ;
+
         if (attr === "N") {
             num = "onlyNumberSp,";
         }
         if (ruleref.mandatory) {
             rule += "required,";
         }
+
+        if ($.validationEngineLanguage.allRules[ruleref.id]){
+            typ = $.validationEngineLanguage.allRules[ruleref.id].typ;
+        } else {
+            typ = 'custom';
+        }
+
         if (ruleref.id && !num) {
-            rule += "custom[" + ruleref.id + "]";
+            rule += typ + "[" + ruleref.id + "]";
         }
         if (ruleref.id && num) {
             rule += "custom[" + ruleref.id + "," + num + "]";

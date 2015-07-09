@@ -568,8 +568,15 @@ O2G.Resource = (function () {
             before, after, minus, plus, sizeempty, empty, iempty, asis,
             sizerange, range1, range2, op, op1, op2, irange, strRange, strEmpty, rule,
             sizeindate, rangedate, irangedate, iindate, strindate, outdate, indate,
-            len, sizelist, ilist, strList, list,
+            len, sizelist, ilist, strList, list, daterule,
             offset = 0;
+        if (!$.validationEngineLanguage){
+            $.validationEngineLanguage = {};
+        }  
+
+        if (!$.validationEngineLanguage.allRules){
+            $.validationEngineLanguage['allRules'] = {};
+        }
 
         if (O2G.Config.DEBUG){
             console.groupCollapsed("generate rules ");
@@ -711,12 +718,17 @@ O2G.Resource = (function () {
                 sizeindate = parseInt(rule.substr(4, 4), 16);
                 indate = [];
                 iindate = 0;
-                strindate = '';
+                strindate = '[';
                 while (sizeindate) {
                     sizeindate -= 1;
-                    strindate += ' [';
+                    strindate += '"';
                     indate[iindate] = O2G.Util.convert2ASCII(rule.substr(8 + (iindate * 32), 30), false).replace(/ /g, "");
-                    strindate += indate[iindate] + ']';
+                    strindate += indate[iindate] + '"';
+                    if (sizeindate){
+                        strindate += ", ";
+                    } else {
+                        strindate += "]";
+                    }
                     iindate += 1;
                 }
                 sizeindate = parseInt(rule.substr(4, 4), 16);
@@ -728,18 +740,33 @@ O2G.Resource = (function () {
                 strRange = '';
                 while (sizerange) {
                     sizerange -= 1;
-                    strRange += ' [';
+                    strRange += ' ["';
                     rangedate = O2G.Util.convert2ASCII(rule.substr(offset + 4 + (irangedate * 36), 36), false);
-                    strRange += rangedate + ']';
+                    strRange += rangedate + '"]';
                     irangedate += 1;
                 }
                 sizerange = parseInt(rule.substr(offset, 4), 16);
                 offset += 4 + (sizerange * 36);
                 outdate = O2G.Util.convert2ASCII(rule.substr(offset, 30), false).replace(/ /g, "");
 
-                if (O2G.Config.DEBUG){
-                    console.debug(typ + ':' + id + ' sub:' + sizesubrules + ' len:' + lenrules + ' prof: ' + profil + ' in ' + sizeindate + ':' + strindate + ' range ' + sizerange + ':' + strRange + ' out:' + outdate);
+                daterule = '{"dateFormat":' + strindate + ', ';
+                if (sizerange){
+                    daterule += '"dateRange":' + strRange + ',';       
                 }
+                daterule += '"dateFormatOutput":"' + outdate + '", ';       
+                daterule += '"alertText":"' + O2G.Config.TEXTE.DATEALERTTEXT1 + '"';       
+                if (sizerange){
+                    daterule += ', "alertTextRange":"' + O2G.Config.TEXTE.DATEALERTTEXT2 + strRange.replace(/\"/g, "'") + '"';
+                }
+                daterule += ' }';
+
+                if (O2G.Config.DEBUG){
+                    console.debug(typ + ":" + id + " sub:" + sizesubrules + " len:" + lenrules + " prof: " + profil + " in " + sizeindate + ":" + strindate + " range " + sizerange + ":" + strRange + " out:" + outdate);
+                }
+
+                $.validationEngineLanguage.allRules[id] = JSON.parse(daterule);
+                $.validationEngineLanguage.allRules[id].typ = 'date';
+
             } else if (typ === 'L') {
                 profil = O2G.Util.convert2ASCII(rule.substr(0, 4), false);
                 sizelist = parseInt(rule.substr(4, 4), 16);

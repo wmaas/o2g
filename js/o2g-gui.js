@@ -161,6 +161,36 @@ O2G.GUI = (function () {
     /**
      * @public
      * @param {string} FKey
+     * @desc Prüft ob geblättert werden kann und reagiert eventl. mit einer Fehlermeldung.
+     *
+     */
+
+    // Debug Only
+    var validFieldsDbg = function (){
+        var ret;
+        O2G.Util.traceDbg('validFields', 'O2G.GUI');
+        ret = validFields();
+        O2G.Util.traceDbg('<<< validFields', 'O2G.GUI');
+        return ret;
+    };
+
+    var validFields = function () {
+        var $errorfield = $('input[resulterrortext]',O2G.GUI.$Screen);
+        if ($errorfield.length){
+            $errorfield.select();
+            O2G.TCntrl.setFNR('9999');
+            O2G.TCntrl.setFPARM(1,$errorfield.attr('resulterrortext'));
+            O2G.GUIStatic.setTitleAndFooter();
+            O2G.TCntrl.setFNR();
+            O2G.TCntrl.setFPARM();
+            return false;
+        }
+        return true;
+    };
+
+    /**
+     * @public
+     * @param {string} FKey
      * @desc Die Maskeneingaben werden validiert (technisch) und im HOST Copybook in hexadezimaler Form 00-FF
      * aufbereitet. Unveränderte Felder werden vom alten HOST Copybook (:copy) übernommen.
      * Da es sich beim HOST Copybook um eine fixe Struktur handelt und unbenutzte Felder mit x'00' und
@@ -194,7 +224,8 @@ O2G.GUI = (function () {
             pool,
             ret,
             copylen,
-            $Field;
+            $Field,
+            $errorfield;
 
         O2G.GUI.isBuffering = true;
         copy = '';
@@ -312,6 +343,8 @@ O2G.GUI = (function () {
         if (O2G.Config.DEBUG) {
             console.groupEnd();
         }
+
+        O2G.GUIStatic.$LastFieldUsed = '';
 
         ret = O2G.TCntrl.setRET(FKey);
         if (ret === 'SHOW') {
@@ -980,6 +1013,7 @@ O2G.GUI = (function () {
         run: run,
         processEnter: processEnter,
         validatePaging: validatePaging,
+        validFields: validFields,
         saveCursor: saveCursor,
         setFieldValue: setFieldValue,
         sendDataToHost: sendDataToHost,
@@ -989,6 +1023,7 @@ O2G.GUI = (function () {
     if (O2G.Config.DEBUG) {
         _export.processEnter = processEnterDbg;
         _export.validatePaging = validatePagingDbg;
+        _export.validFields = validFieldsDbg;
         _export.sendDataToHost = sendDataToHostDbg;
         _export.showDataFromHost = showDataFromHostDbg;
     }
