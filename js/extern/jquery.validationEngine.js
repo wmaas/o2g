@@ -580,6 +580,7 @@
 				switch (rules[i]) {
 
 					case "required":
+						if (O2G.CONFIG.DEBUG) console.debug("required rule");
 						required = true;
 						errorMsg = methods._getErrorMessage(form, field, rules[i], rules, i, options, methods._required);
 						break;
@@ -587,15 +588,19 @@
 						errorMsg = methods._getErrorMessage(form, field, rules[i], rules, i, options, methods._custom);
 						break;
 					case "amount":
+						if (O2G.CONFIG.DEBUG) console.debug(rules[i]);
 						errorMsg = methods._getErrorMessage(form, field, rules[i], rules, i, options, methods._amount);
 						break;
 					case "date":
+						if (O2G.CONFIG.DEBUG) console.debug(rules[i]);
 						errorMsg = methods._getErrorMessage(form, field, rules[i], rules, i, options, methods._date);
 						break;						
 					case "struct":
+						if (O2G.CONFIG.DEBUG) console.debug(rules[i]);
 						errorMsg = methods._getErrorMessage(form, field, rules[i], rules, i, options, methods._struct);
 						break;						
 					case "list":
+						if (O2G.CONFIG.DEBUG) console.debug(rules[i]);
 						errorMsg = methods._getErrorMessage(form, field, rules[i], rules, i, options, methods._list);
 						break;						
 					case "groupRequired":
@@ -1279,6 +1284,8 @@ _amount:  function(field, rules, i, options) {
 	*/
 	if (rule.emptyFormat !== undefined) {
 		value = (String(value) == rule.emptyFormat[0] || String(value) == rule.emptyFormat[1]) ? rule.emptyFormat[2] : value;
+	} else if (!value.length){
+		return;
 	}
 
 	/** 
@@ -2677,7 +2684,7 @@ _date: function (field, rules, i, options) {
 		// did one of the validation fail ? kept global to stop further ajax validations
 		isError: false,
 		// Limit how many displayed errors a field can have
-		maxErrorsPerField: false,
+		maxErrorsPerField: 1,
 
 		// Caches field validation status, typically only bad status are created.
 		// the array is used during ajax form validation to detect issues early and prevent an expensive submit
