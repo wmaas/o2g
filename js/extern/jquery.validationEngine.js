@@ -592,8 +592,11 @@
 					case "date":
 						errorMsg = methods._getErrorMessage(form, field, rules[i], rules, i, options, methods._date);
 						break;						
-					case "strukt":
-						errorMsg = methods._getErrorMessage(form, field, rules[i], rules, i, options, methods._strukt);
+					case "struct":
+						errorMsg = methods._getErrorMessage(form, field, rules[i], rules, i, options, methods._struct);
+						break;						
+					case "list":
+						errorMsg = methods._getErrorMessage(form, field, rules[i], rules, i, options, methods._list);
 						break;						
 					case "groupRequired":
 						// Check is its the first of group, if not, reload validation with first field
@@ -815,7 +818,7 @@
 			 // Otherwise if we are doing a function call, make the call and return the object
 			 // that is passed back.
 	 		 var rule_index = jQuery.inArray(rule, rules);
-			 if (rule === "custom" || rule === "funcCall" || rule === "amount" || rule === "strukt") {
+			 if (rule === "custom" || rule === "funcCall" || rule === "amount" || rule === "struct") {
 				 var custom_validation_type = rules[rule_index + 1];
 				 rule = rule + "[" + custom_validation_type + "]";
 				 // Delete the rule from the rules array so that it doesn't try to call the
@@ -993,16 +996,44 @@
 		*            user options
 		* @return an error string if validation failed
 		*/
-_strukt : function (field, rules, i, options) {
+_list : function (field, rules, i, options) {
+	var customRule = rules[i + 1],
+		rule = options.allrules[customRule],
+		value = field.val().trim(),
+		list,
+		len;
+
+	jQuery(field).removeAttr('resulterrortext');
+	jQuery(field).removeAttr('resultstring');
+
+	list = rule.listFormat;
+
+	/** if rule is not found */
+	if (!rule) {
+		jQuery(field).attr('resulterrortext', 'Rule not found - ' + customRule);
+		return;
+	}
+
+	if (!value.length){
+		return;
+	}
+
+	if (list.indexOf(value) < 0){
+		jQuery(field).attr('resulterrortext', rule.alertText + JSON.stringify(list));
+		return rule.alertText + JSON.stringify(list);
+	}
+},
+		
+_struct : function (field, rules, i, options) {
 	var customRule = rules[i + 1],
 		rule = options.allrules[customRule],
 		ipRegEx,
 		opRegExp,
 		value = field.val(),
-		struktFormat = rule.struktFormat,
-		struktIpFormat,
-		struktOpFormat,
-		ipfLen = struktFormat.length,
+		structFormat = rule.structFormat,
+		structIpFormat,
+		structOpFormat,
+		ipfLen = structFormat.length,
 		ipLiteralValueArray,
 		opLiteralValueArray,
 		rangeValueArray,
@@ -1019,7 +1050,7 @@ _strukt : function (field, rules, i, options) {
 		opFormatTokenValue,
 		ipFormatTokenValue,
 		opFormatToken,
-		struktOpFormatOrg,
+		structOpFormatOrg,
 		found,
 		opFmtTknLtrlNine,
 		opFmtTknLtrlNineRegExp = new RegExp('^([9]*)$'),
@@ -1037,6 +1068,9 @@ _strukt : function (field, rules, i, options) {
 		return;
 	}
 
+	if (!value.length){
+		return;
+	}
 
 	/** Initializing regular expression */
 	rule.ipRegEx = (!rule.ipRegEx) ?  [] : rule.ipRegEx;
@@ -1044,24 +1078,24 @@ _strukt : function (field, rules, i, options) {
 
 	while (ipfLen--) {
 		/** Get the output-format of the corresponding input-format*/
-		struktOpFormat = (struktFormat[ipfLen][1] !== undefined) ? struktFormat[ipfLen][1] : '';
-		struktOpFormatOrg = struktOpFormat;
+		structOpFormat = (structFormat[ipfLen][1] !== undefined) ? structFormat[ipfLen][1] : '';
+		structOpFormatOrg = structOpFormat;
 		found = true;
 		/**
 		* if regular expression of the rule selected is not exist.
 		*/
 		if (!rule.ipRegEx[ipfLen]) {
 			/** Get the input-format */
-			struktIpFormat = struktFormat[ipfLen][0];
+			structIpFormat = structFormat[ipfLen][0];
 
 			/** Get the output-format of the corresponding input-format*/
-			opLiteralValueArray = (struktOpFormat.match(opFrmtLtrlRegExpObj) || []);
+			opLiteralValueArray = (structOpFormat.match(opFrmtLtrlRegExpObj) || []);
 
 			/** Get the literal value in the input-format if any*/
-			ipLiteralValueArray = (struktIpFormat.match(/(\'\w+\.\')/g) || []);
+			ipLiteralValueArray = (structIpFormat.match(/(\'\w+\.\')/g) || []);
 
 			/** Get the range value in the input-format if any*/
-			rangeValueArray = (struktIpFormat.match(/([0-9]*\:[0-9]*)/g) || []);
+			rangeValueArray = (structIpFormat.match(/([0-9]*\:[0-9]*)/g) || []);
 
 			rule.rangeValueArray = (!rule.rangeValueArray) ? [] : rule.rangeValueArray;
 			
@@ -1073,7 +1107,7 @@ _strukt : function (field, rules, i, options) {
 			while (rangeValueLen--) {
 				rangeArray = rangeValueArray[rangeValueLen].split(':');
 				rangeValueRegExp[rangeValueLen] = '([0-9]{' + rangeArray[0].length + ',' + rangeArray[1].length + '})';
-				struktIpFormat = struktIpFormat.replace(rangeValueArray[rangeValueLen], rangeValueRegExp[rangeValueLen]);
+				structIpFormat = structIpFormat.replace(rangeValueArray[rangeValueLen], rangeValueRegExp[rangeValueLen]);
 			}
 			ipLiteralValueLen = ipLiteralValueArray.length;
 
@@ -1082,24 +1116,24 @@ _strukt : function (field, rules, i, options) {
 			* to  avoid conflicts between the period(.) in the literals and normal period(.), like ..GG%.
 			*/
 			while (ipLiteralValueLen--) {
-				struktIpFormat = struktIpFormat.replace(ipLiteralValueArray[ipLiteralValueLen], '$' + ipLiteralValueLen);
+				structIpFormat = structIpFormat.replace(ipLiteralValueArray[ipLiteralValueLen], '$' + ipLiteralValueLen);
 			}
 
 			/** 'len' is used here because, the token order in the array 'opLiteralValueArray' is matter, in case of, for example, '99.'.9 */
 			opLiteralValueLen = opLiteralValueArray.length;
 			len = 0;
 			while (len < opLiteralValueLen) {
-				struktOpFormat = (opLiteralValueArray[len]) ? struktOpFormat.replace(opLiteralValueArray[len], '$' + len) : struktOpFormat;
+				structOpFormat = (opLiteralValueArray[len]) ? structOpFormat.replace(opLiteralValueArray[len], '$' + len) : structOpFormat;
 				len++;
 			}
 
-			opRegExp = struktOpFormat.replace(/G/g, '(G)').replace(/K/g, '(K)').
+			opRegExp = structOpFormat.replace(/G/g, '(G)').replace(/K/g, '(K)').
 									replace(/\-/g, '(\-)').replace(/\%/g, '(\%)').
 									replace(/\./g, '([\.])');
 
 			/** Replace all the input token value with the respective regular expression. */
 			//TODO: need to check with more special characters.
-			ipRegEx = struktIpFormat.replace(/A/g, '([A-Za-z])').replace(/\%/g, '([0-9A-Za-z,$!#%]*)')
+			ipRegEx = structIpFormat.replace(/A/g, '([A-Za-z])').replace(/\%/g, '([0-9A-Za-z,$!#%]*)')
 									.replace(/\./g, '([0-9A-Za-z,$!#%])').replace(/G/g, '([A-Z])').replace(/K/g, '([a-z])')
 									.replace(/N/g, '([0-9])').replace(/C/g, '([0-9A-Za-z,$!#%])').replace(/H/g, '([0-9A-F])');
 
@@ -1162,14 +1196,14 @@ _strukt : function (field, rules, i, options) {
 
 			if (found) {
 				/** Find the number of regular expression token to get the corresponding value in the given input. */
-				ipFormatRegExpLen = (!struktOpFormatOrg) ? 0 : (String(rule.ipRegEx[ipfLen]).match(/\(/g) || []).length;
+				ipFormatRegExpLen = (!structOpFormatOrg) ? 0 : (String(rule.ipRegEx[ipfLen]).match(/\(/g) || []).length;
 				opFormatTokenValue = (!ipFormatRegExpLen) ? value : '';
 
 				/** Convert the given input into the defined output-formt.*/
 				while (ipFormatRegExpLen--) {
 					/** Get the corresponding value from the given input-value */
 					ipFormatTokenValue = value.replace(rule.ipRegEx[ipfLen], ('$' + (ipFormatRegExpLen + 1)));
-					opFormatToken = struktOpFormatOrg.replace(rule.opRegExp[ipfLen], ('$' + (ipFormatRegExpLen + 1)));
+					opFormatToken = structOpFormatOrg.replace(rule.opRegExp[ipfLen], ('$' + (ipFormatRegExpLen + 1)));
 
 					/** If 'opFormatToken' has the format like '9999' series, as part of output format.. */
 					opFmtTknNine = 'NONE';
@@ -1198,8 +1232,8 @@ _strukt : function (field, rules, i, options) {
 			}
 		}
 	}
-	jQuery(field).attr('resulterrortext', rule.alertText);
-	return rule.alertText;
+	jQuery(field).attr('resulterrortext', rule.alertText + JSON.stringify(structFormat));
+	return rule.alertText + JSON.stringify(structFormat);
 },
 		
 		/**
@@ -1216,6 +1250,7 @@ _amount:  function(field, rules, i, options) {
 	var customRule = rules[i + 1],
 		rule = options.allrules[customRule],
 		value = field.val(),
+		maxlen = parseInt(field.attr('maxlength'), 10),
 		regExpSpDo = new RegExp('[\\s\\.]', 'g'),
 		regExpComma = new RegExp('[,]'),
 		plusMinus,
@@ -1235,7 +1270,6 @@ _amount:  function(field, rules, i, options) {
 		jQuery(field).attr('resulterrortext', 'Rule not found - ' + customRule);
 		return;
 	}
-
 
 	/**
 	* The following 'if..' is used for this kind of rule
@@ -1302,11 +1336,16 @@ _amount:  function(field, rules, i, options) {
 
 	} /** if(!rule.regEx) */
 
+	value = value.trim().replace(/^0+/, ''); //remove leading zeroes and spaces
+	if (!value){
+		value = '0';
+	} 
 	value = value.replace(regExpSpDo, '').replace(regExpComma, '.');
+
 	/** checking the input 'value' based on the defined Regular expression */
 	if (!rule.regEx.test(value)) {
-		jQuery(field).attr('resulterrortext', rule.alertText);
-		return rule.alertText;
+		jQuery(field).attr('resulterrortext', rule.alertText + ' ( ' + String(rule.beforeComma) + ',' + String(rule.afterComma) + ' )');
+		return rule.alertText + ' ( ' + String(rule.beforeComma) + ',' + String(rule.afterComma) + ' )';
 	}
 	/** passed input 'value' is been splitted into two parts(integer and decimal) */
 	arrValue = value.split('.', 2);
@@ -1333,8 +1372,8 @@ _amount:  function(field, rules, i, options) {
 	* this if is executed while the amount range is not defined.
 	*/
 	if (!arrValue[0]) {
-		jQuery(field).attr('resulterrortext', rule.alertText);
-		return rule.alertText;
+		jQuery(field).attr('resulterrortext', rule.alertText + ' ( ' + String(rule.beforeComma) + ',' + String(rule.afterComma) + ' )');
+		return rule.alertText + ' ( ' + String(rule.beforeComma) + ',' + String(rule.afterComma) + ' )';
 	}
 	/** getting only numbers if value is with '+' or '-' sign */
 	arrValue[0] = (arrValue[0] && (arrValue[0].indexOf('+') >= 0 || arrValue[0].indexOf('-') >= 0)) ? arrValue[0].substr(1) : arrValue[0];
@@ -1346,18 +1385,24 @@ _amount:  function(field, rules, i, options) {
 	arrValue[1] = (!arrValue[1] && rule.afterComma) ? $.validationEngine.defaults.stringZeros.substr(0, rule.afterComma) : arrValue[1];
 	finalResultString += (arrValue[1]) ? arrValue[1] + $.validationEngine.defaults.stringZeros.substr(0, rule.afterComma - arrValue[1].length) : '';
 
-	index = 0;
 	len = finalResultString.length;
 	/**
 	* looping through to convert into hexa value.
-	* for example:  12  result: C0C0C1C2C0C0
+	* for example:  12  result: F0F0F1F2F0F0
 	*               -12  result: C0C0C1C2C0D0
 	*/
+
+	index = 0;
+	maxlen -= len;
+	while (index++ < maxlen) {
+		hexResult += 'F0'; 
+	}
+	index = 0;
 	while (index < len) {
-		hexResult += 'C' + finalResultString[index++];
+		hexResult += 'F' + finalResultString[index++];
 	}
 	/** adding letter 'D', in case of negative value */
-	hexResult = (value < 0) ? hexResult.substring(0, (len - 1) * 2) + 'D' + hexResult.substring(((len - 1) * 2) + 1) : hexResult;
+	hexResult = (value < 0) ? hexResult.substring(0, (len + maxlen - 1) * 2) + 'D' + hexResult.substring(((len + maxlen - 1) * 2) + 1) : hexResult;
 
 	jQuery(field).attr('resultstringhex', hexResult);
 },
@@ -2585,7 +2630,7 @@ _date: function (field, rules, i, options) {
 	// for global access (especially for Qunit)
     $.methodAmount = methods._amount;
     $.methodDate = methods._date;
-    $.methodStrukt = methods._strukt;
+    $.methodstruct = methods._struct;
 
 	// LEAK GLOBAL OPTIONS
 	$.validationEngine= {fieldIdCounter: 0,defaults:{

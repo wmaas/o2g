@@ -133,8 +133,12 @@ O2G.Config = (function () {
             STORAGE_ERROR: 'Ihr Browser unterstützt nicht alle O2G Vorausetzungen,' + ' bitte setzen Sie sich mit dem IT Support in Verbindung',
             MASTERMENUETITLE: 'O2G Menue',
             MENUETITLE: ' Menue',
-            DATEALERTTEXT1: 'Ungültiges Datumsformat, gültige Formate sind ',
-            DATEALERTTEXT2: 'Ungültiger Zeitraum, gültig ist '
+            DATEALERTTEXT1: 'Datum falsch, gültige Formate sind ',
+            DATEALERTTEXT2: 'Ungültiger Zeitraum, gültig ist ',
+            AMOUNTALERTTEXT1: 'Betrag falsch, gültiges Format ist ',
+            AMOUNTALERTTEXT2: 'Ungültiger Wert, gültig ist ',
+            STRUCTALERTTEXT1: 'Ungültiger Wert, gültige Formate sind ',
+            LISTALERTTEXT1: 'Ungültiger Wert, gültige Werte sind '
         },
 
         SLV: {

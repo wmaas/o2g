@@ -223,6 +223,7 @@ O2G.GUI = (function () {
             len,
             pool,
             ret,
+            usehexstring,
             copylen,
             $Field,
             $errorfield;
@@ -268,15 +269,30 @@ O2G.GUI = (function () {
                     lenval = 0;
                     len = parseInt(input.attr('maxlength'), 10);
                     if (input.val()) {
-                        data = input.val();
-                        lenval = data.length;
-                        if (uctxid) {
-                            data = data.replace("ß", '\n').toUpperCase().replace("\n", 'ß');
+                        usehexstring = false;
+                        if (input.attr('resultstring')){
+                            data = input.attr('resultstring');
+                        } else if (input.attr('resultstringhex')){
+                            usehexstring = true;
+                            data = input.attr('resultstringhex');
+                        } else {
+                            data = input.val();
                         }
-                        data = O2G.Util.convert2HexEBCDIC(data);
+
+                        if (usehexstring) {
+                            lenval = data.length/2;
+                        } else {
+                            lenval = data.length;
+                            if (uctxid) {
+                                data = data.replace("ß", '\n').toUpperCase().replace("\n", 'ß');
+                            }
+                            data = O2G.Util.convert2HexEBCDIC(data);
+                        }
+
                         if (O2G.Config.DEBUG) {
                             console.debug($Field.attr('id') + ' ' + input.val() + ' ' + lenval + ' ' + len + ' N:' + data + ' O:' + oldcopy.substr(copylen + 14, len * 2));
                         }
+
                         if (oldcopy.substr(copylen + 14, len * 2) === data || (oldcopy.substr(copylen + 14, data.length) === data && data.length < len * 2 && oldcopy.substr(data.length + copylen + 14, (len * 2) - data.length) === O2G.Util.hex40.substr(0, (len * 2) - data.length))) {
                             copy += 'FF07' + data;
                         } else {

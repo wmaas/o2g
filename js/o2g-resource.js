@@ -568,7 +568,7 @@ O2G.Resource = (function () {
             before, after, minus, plus, sizeempty, empty, iempty, asis,
             sizerange, range1, range2, op, op1, op2, irange, strRange, strEmpty, rule,
             sizeindate, rangedate, irangedate, iindate, strindate, outdate, indate,
-            len, sizelist, ilist, strList, list, daterule,
+            len, sizelist, ilist, strList, list, daterule, amountrule,
             offset = 0;
         if (!$.validationEngineLanguage){
             $.validationEngineLanguage = {};
@@ -713,6 +713,27 @@ O2G.Resource = (function () {
                 if (O2G.Config.DEBUG){
                     console.debug(typ + ':' + id + ' sub:' + sizesubrules + ' len:' + lenrules + ' prof: ' + profil + ' del:  ' + delimitersign + ' dec: ' + decimalsign + ' vork: ' + before + ' nachk: ' + after + ' minus: ' + minus + ' plus: ' + plus + ' ' + sizeempty + ':' + strEmpty + ' ' + sizerange + ':' + strRange + ' asis:' + asis);
                 }    
+
+                amountrule = '{"beforeComma":' + before;
+                amountrule += ', "afterComma":' + after;
+                if (plus.trim()){
+                    amountrule += ', "plus":"' + plus + '"';
+                }
+                if (minus.trim()){
+                    amountrule += ', "minus":"' + minus + '"';
+                }
+                if (asis !== 'N'){
+                    amountrule += ', "asis":"' + asis + '"';
+                }
+                amountrule += ', "alertText":"' + O2G.Config.TEXTE.AMOUNTALERTTEXT1 + '"';       
+                if (sizerange){
+                    amountrule += ', "alertTextRange":"' + O2G.Config.TEXTE.AMOUNTALERTTEXT2 + strRange.replace(/\"/g, "'") + '"';
+                }
+                amountrule += '}';
+
+                $.validationEngineLanguage.allRules[id] = JSON.parse(amountrule);
+                $.validationEngineLanguage.allRules[id].typ = 'amount';
+
             } else if (typ === 'D') {
                 profil = O2G.Util.convert2ASCII(rule.substr(0, 4), false);
                 sizeindate = parseInt(rule.substr(4, 4), 16);
@@ -779,28 +800,40 @@ O2G.Resource = (function () {
                 }
                 while (sizelist) {
                     sizelist -= 1;
-                    strList += '"';
                     len = 2 * parseInt(rule.substr(8 + offset, 2), 16);
-                    list[ilist] = O2G.Util.convert2ASCII(rule.substr(10 + offset, len), false);
-                    strList += list[ilist];
-                    ilist += 1;
-                    if (sizelist) {
-                        strList += '", ';
-                    } else {
+                    if (len){
                         strList += '"';
+                        list[ilist] = O2G.Util.convert2ASCII(rule.substr(10 + offset, len), false);
+                        if (list[ilist]) {
+                            strList += list[ilist];
+                        } else {
+                            strList += ' ';
+                        }
+                        ilist += 1;
+                        if (sizelist) {
+                            strList += '", ';
+                        } else {
+                            strList += '"';
+                        }
                     }
                     offset += len + 2;
                 }
+
                 sizelist = parseInt(rule.substr(4, 4), 16);
+
                 if (sizelist) {
+                    if (strList.substr(strList.length - 2, 2) === ', '){
+                        strList = strList.substr(0, strList.length - 2)
+                    }
                     strList += ']';
                 }
 
-                O2G.Resource.rules[id] = list;
+                $.validationEngineLanguage.allRules[id] = JSON.parse('{"listFormat":' + strList + ', "alertText":"' + O2G.Config.TEXTE.LISTALERTTEXT1 + '"}');
+                $.validationEngineLanguage.allRules[id].typ = 'list';
 
                 if (O2G.Config.DEBUG){
                     console.debug(typ + ':' + id + ' sub:' + sizesubrules + ' len:' + lenrules + ' prof: ' + profil + ' list ' + sizelist + ':' + strList);
-                }
+                }                
             } else if (typ === 'S') {
                 profil = O2G.Util.convert2ASCII(rule.substr(0, 4), false);
                 sizelist = parseInt(rule.substr(4, 4), 16);
@@ -813,24 +846,34 @@ O2G.Resource = (function () {
                 }
                 while (sizelist) {
                     sizelist -= 1;
-                    strList += '"';
                     len = 2 * parseInt(rule.substr(8 + offset, 2), 16);
-                    list[ilist] = O2G.Util.convert2ASCII(rule.substr(10 + offset, len), false);
-                    strList += list[ilist];
-                    ilist += 1;
-                    if (sizelist) {
-                        strList += '", ';
-                    } else {
+                    if (len){
                         strList += '"';
+                        list[ilist] = O2G.Util.convert2ASCII(rule.substr(10 + offset, len), false);
+                        if (list[ilist]) {
+                            strList += list[ilist];
+                        } else {
+                            strList += ' ';
+                        }
+                        ilist += 1;
+                        if (sizelist) {
+                            strList += '", ';
+                        } else {
+                            strList += '"';
+                        }
                     }
                     offset += len + 2;
                 }
                 sizelist = parseInt(rule.substr(4, 4), 16);
                 if (sizelist) {
+                    if (strList.substr(strList.length - 2, 2) === ', '){
+                        strList = strList.substr(0, strList.length - 2)
+                    }
                     strList += ']';
                 }
 
-                O2G.Resource.rules[id] = list;
+                $.validationEngineLanguage.allRules[id] = JSON.parse('{"structFormat":' + strList + ', "alertText":"' + O2G.Config.TEXTE.STRUCTALERTTEXT1 + '"}');
+                $.validationEngineLanguage.allRules[id].typ = 'struct';
 
                 if (O2G.Config.DEBUG){
                     console.debug(typ + ':' + id + ' sub:' + sizesubrules + ' len:' + lenrules + ' prof: ' + profil + ' slist ' + sizelist + ':' + strList);
@@ -844,8 +887,6 @@ O2G.Resource = (function () {
         if (O2G.Config.DEBUG){
             console.groupEnd();
         }
-
-        O2G.Resource.rules = {};
     };
 
     /**
@@ -900,7 +941,6 @@ O2G.Resource = (function () {
         loadheader: {},
         tfolge: {},
         menue: {},
-        rules: {},
         text: {},
         resourceloaded: '',
         // Funktionen, die von anderen Modulen des O2G Paketes verwendet werden
