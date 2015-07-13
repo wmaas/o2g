@@ -580,7 +580,7 @@
 				switch (rules[i]) {
 
 					case "required":
-						if (O2G.CONFIG.DEBUG) console.debug("required rule");
+						if (O2G.Config.DEBUG) console.debug("required rule");
 						required = true;
 						errorMsg = methods._getErrorMessage(form, field, rules[i], rules, i, options, methods._required);
 						break;
@@ -588,19 +588,19 @@
 						errorMsg = methods._getErrorMessage(form, field, rules[i], rules, i, options, methods._custom);
 						break;
 					case "amount":
-						if (O2G.CONFIG.DEBUG) console.debug(rules[i]);
+						if (O2G.Config.DEBUG) console.debug(rules[i]);
 						errorMsg = methods._getErrorMessage(form, field, rules[i], rules, i, options, methods._amount);
 						break;
 					case "date":
-						if (O2G.CONFIG.DEBUG) console.debug(rules[i]);
+						if (O2G.Config.DEBUG) console.debug(rules[i]);
 						errorMsg = methods._getErrorMessage(form, field, rules[i], rules, i, options, methods._date);
 						break;						
 					case "struct":
-						if (O2G.CONFIG.DEBUG) console.debug(rules[i]);
+						if (O2G.Config.DEBUG) console.debug(rules[i]);
 						errorMsg = methods._getErrorMessage(form, field, rules[i], rules, i, options, methods._struct);
 						break;						
 					case "list":
-						if (O2G.CONFIG.DEBUG) console.debug(rules[i]);
+						if (O2G.Config.DEBUG) console.debug(rules[i]);
 						errorMsg = methods._getErrorMessage(form, field, rules[i], rules, i, options, methods._list);
 						break;						
 					case "groupRequired":
